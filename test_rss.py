@@ -437,16 +437,20 @@ def test_config_save_writes(bot_config_save):
     bot_config_save.memory['rss']['templates']['t'] = '<<{}>>'
     rss._config_save(bot_config_save)
     expected = '''[core]
-owner = '''+'''
-admins = '''+'''
-homedir = ''' + bot_config_save.config.homedir + '''
+owner = tester
+nick = Sopel
+enable = rss
 db_filename = ''' + bot_config_save.db.filename + '''
-channels = #channel1
+channels = 
+	"#channel1"
 
 [rss]
-feeds = #channel1''' + rss.CONFIG_SEPARATOR + '''feed1''' + rss.CONFIG_SEPARATOR + '''http://www.site1.com/feed''' + rss.CONFIG_SEPARATOR + '''f=fl+ftl;t=t|>>{}<<
-formats = f=ft+ftpal
-templates = t=t|<<{}>>
+feeds = 
+	"#channel1''' + rss.CONFIG_SEPARATOR + '''feed1''' + rss.CONFIG_SEPARATOR + '''http://www.site1.com/feed''' + rss.CONFIG_SEPARATOR + '''f=fl+ftl;t=t|>>{}<<"
+formats = 
+	f=ft+ftpal
+templates = 
+	t=t|<<{}>>
 
 '''
     f = open(bot_config_save.config.filename, 'r')
