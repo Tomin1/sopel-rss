@@ -2,12 +2,18 @@
 from __future__ import unicode_literals
 from sopel.db import SopelDB
 from sopel.modules import rss
-from sopel.test_tools import MockSopel, MockConfig
 import hashlib
 import os
 import pytest
 import tempfile
 import types
+
+TMP_CONFIG = """
+[core]
+owner = tester
+nick = Sopel
+enable = rss
+"""
 
 FEED_VALID = '''<?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0" xml:base="http://www.site1.com/feed" xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -121,8 +127,8 @@ FEED_SPY = '''<?xml version="1.0" encoding="UTF-8"?>
 </rss>
 '''
 
-def _fixture_bot_setup(request):
-    bot = MockSopel('Sopel')
+def _fixture_bot_setup(request, botfactory, configfactory):
+    bot = botfactory(configfactory('test.cfg', TMP_CONFIG))
     bot = rss._config_define(bot)
     bot.config.core.db_filename = tempfile.mkstemp()[1]
     bot.db = SopelDB(bot.config)
@@ -158,36 +164,36 @@ def _fixture_bot_add_data(bot, id, url):
 
 
 @pytest.fixture(scope="function")
-def bot(request):
-    bot = _fixture_bot_setup(request)
+def bot(request, botfactory, configfactory):
+    bot = _fixture_bot_setup(request, botfactory, configfactory)
     bot = _fixture_bot_add_data(bot, '1', 'http://www.site1.com/feed')
     return bot
 
 
 @pytest.fixture(scope="function")
-def bot_config_save(request):
-    bot = _fixture_bot_setup(request)
+def bot_config_save(request, botfactory, configfactory):
+    bot = _fixture_bot_setup(request, botfactory, configfactory)
     bot = _fixture_bot_add_data(bot, '1', 'http://www.site1.com/feed')
     return bot
 
 
 @pytest.fixture(scope="function")
-def bot_basic(request):
-    bot = _fixture_bot_setup(request)
+def bot_basic(request, botfactory, configfactory):
+    bot = _fixture_bot_setup(request, botfactory, configfactory)
     return bot
 
 
 @pytest.fixture(scope="function")
-def bot_rss_list(request):
-    bot = _fixture_bot_setup(request)
+def bot_rss_list(request, botfactory, configfactory):
+    bot = _fixture_bot_setup(request, botfactory, configfactory)
     bot = _fixture_bot_add_data(bot, '1', 'http://www.site1.com/feed')
     bot = _fixture_bot_add_data(bot, '2', 'http://www.site2.com/feed')
     return bot
 
 
 @pytest.fixture(scope="function")
-def bot_rss_update(request):
-    bot = _fixture_bot_setup(request)
+def bot_rss_update(request, botfactory, configfactory):
+    bot = _fixture_bot_setup(request, botfactory, configfactory)
     bot = _fixture_bot_add_data(bot, '1', FEED_VALID)
     return bot
 
@@ -317,26 +323,26 @@ def test_rss_global_update_update(bot_rss_update):
     assert expected == bot_rss_update.output
 
 
-def test_config_define_sopelmemory():
-    bot = MockSopel('Sopel')
+def test_config_define_sopelmemory(botfactory, configfactory):
+    bot = botfactory(configfactory('test.cfg', TMP_CONFIG))
     bot = rss._config_define(bot)
     assert type(bot.memory['rss']) == rss.SopelMemory
 
 
-def test_config_define_feeds():
-    bot = MockSopel('Sopel')
+def test_config_define_feeds(botfactory, configfactory):
+    bot = botfactory(configfactory('test.cfg', TMP_CONFIG))
     bot = rss._config_define(bot)
     assert type(bot.memory['rss']['feeds']) == dict
 
 
-def test_config_define_hashes():
-    bot = MockSopel('Sopel')
+def test_config_define_hashes(botfactory, configfactory):
+    bot = botfactory(configfactory('test.cfg', TMP_CONFIG))
     bot = rss._config_define(bot)
     assert type(bot.memory['rss']['hashes']) == dict
 
 
-def test_config_define_formats():
-    bot = MockSopel('Sopel')
+def test_config_define_formats(botfactory, configfactory):
+    bot = botfactory(configfactory('test.cfg', TMP_CONFIG))
     bot = rss._config_define(bot)
     assert type(bot.memory['rss']['options']) == dict
 
