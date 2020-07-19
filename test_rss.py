@@ -432,9 +432,12 @@ def test_config_save_writes(bot_rss_list):
     bot_rss_list.memory['rss']['options']['feed1'].set_format('f=fl+ftl')
     bot_rss_list.memory['rss']['options']['feed1'].set_templates('t=t|>>{}<<')
     bot_rss_list.memory['rss']['formats'] = ['ft+ftpal']
+    bot_rss_list.memory['rss']['options']['feed2'].set_format('f=fl+ftls')
+    bot_rss_list.memory['rss']['options']['feed2'].set_templates('t=s|<<{}>>')
     for t in rss.TEMPLATES_DEFAULT:
         bot_rss_list.memory['rss']['templates'][t] = rss.TEMPLATES_DEFAULT[t]
-    bot_rss_list.memory['rss']['templates']['t'] = '<<{}>>'
+    bot_rss_list.memory['rss']['templates']['t'] = '>>{}<<'
+    bot_rss_list.memory['rss']['templates']['s'] = '<<{}>>'
     rss._config_save(bot_rss_list)
     expected = '''[core]
 owner = tester
@@ -448,11 +451,11 @@ channels =
 [rss]
 feeds = 
 	"#channel1''' + rss.CONFIG_SEPARATOR + '''feed1''' + rss.CONFIG_SEPARATOR + '''http://www.site1.com/feed''' + rss.CONFIG_SEPARATOR + '''f=fl+ftl;t=t|>>{}<<"
-	"#channel2''' + rss.CONFIG_SEPARATOR + '''feed2''' + rss.CONFIG_SEPARATOR + '''http://www.site2.com/feed"
+	"#channel2''' + rss.CONFIG_SEPARATOR + '''feed2''' + rss.CONFIG_SEPARATOR + '''http://www.site2.com/feed''' + rss.CONFIG_SEPARATOR + '''f=fl+ftls;t=s|<<{}>>"
 formats = 
 	f=ft+ftpal
 templates = 
-	t=t|<<{}>>
+	t=s|<<{}>>;t=t|>>{}<<
 
 '''
     f = open(bot_rss_list.config.filename, 'r')
