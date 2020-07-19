@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from sopel.db import SopelDB
-from sopel.modules import rss
+import rss
 import hashlib
 import os
 import pytest
