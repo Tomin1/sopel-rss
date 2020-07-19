@@ -136,6 +136,7 @@ TEMPLATES_DEFAULT = {
     's': '{}',
     't': '{}',
     'y': ESCAPE_CHARACTER + '16→' + ESCAPE_CHARACTER + '16 {}',
+    'r': ESCAPE_CHARACTER + '16→' + ESCAPE_CHARACTER + '16 {}',
 }
 
 COMMANDS = {
@@ -176,7 +177,7 @@ COMMANDS = {
     'fields': {
         'synopsis': 'synopsis: {}rss fields <name>',
         'helptext': ['list all feed item fields available for the feed identified by <name>.',
-                     'f: feedname, a: author, d: description, g: guid, l: link, p: published, s: summary, t: title, y: tinyurl'],
+                     'f: feedname, a: author, d: description, g: guid, l: link, p: published, s: summary, t: title, y: tinyurl, r: redirect free url'],
         'examples': ['{}rss fields guardian'],
         'required': 1,
         'optional': 0,
@@ -1151,6 +1152,7 @@ class Options:
             's': saneitem['summary'],
             't': saneitem['title'],
             'y': saneitem['link'],
+            'r': saneitem['link'],
         }
 
         signature = ''
@@ -1198,6 +1200,9 @@ class Options:
         shorturl = ''
         if 'y' in self.get_output():
             shorturl = self.feedreader.get_tinyurl(saneitem['link'])
+        redirect_free_url = ''
+        if 'r' in self.get_output():
+            shorturl = self.feedreader.get_redirect_free_url(saneitem['link'])
 
         legend = {
             'f': feedname,
@@ -1209,6 +1214,7 @@ class Options:
             's': saneitem['summary'],
             't': saneitem['title'],
             'y': shorturl,
+            'r': redirect_free_url,
         }
 
         templates = self._get_templates_overrides()
@@ -1406,6 +1412,8 @@ class Options:
             fields += 't'
         if hasattr(item, 'link'):
             fields += 'y'
+        if hasattr(item, 'link'):
+            fields += 'r'
 
         return fields
 
@@ -1554,6 +1562,14 @@ class FeedReader:
             return tinyurl
         return url
 
+    def get_redirect_free_url(self, url):
+        try:
+            newurl = urllib.request.urlopen(url).geturl()
+        except (urllib.error.HTTPError, urllib.error.URLError):
+            return url
+        else:
+            if newurl.startswith('http'):
+                return newurl
 
 # Implementing a mock rss feed reader
 class MockFeedReader:
@@ -1569,6 +1585,9 @@ class MockFeedReader:
 
     def get_tinyurl(self, url):
         return 'https://tinyurl.com/govvpmm'
+
+    def get_redirect_free_url(self, url):
+        return url
 
 
 # Implementing a ring buffer
