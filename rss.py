@@ -403,7 +403,7 @@ def _config_concatenate_feeds(bot):
 
         feeds.append(newfeed)
         feeds.sort()
-    return [','.join(feeds)]
+    return feeds
 
 
 def _config_concatenate_formats(bot):
@@ -441,7 +441,7 @@ def _config_define(bot):
 
 
 def _config_get_feeds(bot):
-    bot.say(_config_concatenate_feeds(bot)[0])
+    bot.say(",".join(_config_concatenate_feeds(bot)))
 
 
 def _config_get_formats(bot):
